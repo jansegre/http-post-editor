@@ -1,0 +1,64 @@
+<!doctype html>
+<html ng-app>
+  <head>
+    <title>HTTP Post Editor</title>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <link href='http://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
+    <style>
+      .monospaced {
+        font-family: 'Inconsolata', monospace;
+      }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.6/angular.min.js"></script>
+    <script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>
+      function Ctrl($scope) {
+        $scope._mark = null;
+        $scope.mark = function (m) {
+          $scope._mark = m;
+        }
+        $scope.$watch('json', function(value) {
+          if ($scope._mark == 'json') {
+            var parsed = JSON.parse(value);
+            var out = [];
+            for (key in parsed) {
+              out.push(key + "=" + escape(parsed[key]));
+            }
+            $scope.raw = out.join('&');
+          }
+        });
+        $scope.$watch('raw', function(value) {
+          if ($scope._mark == 'raw') {
+            var parsed = {};
+            value.split('&').forEach(function(e){
+              var pair = e.split('=');
+              parsed[pair[0]] = unescape(pair[1]);
+            })
+            $scope.json = JSON.stringify(parsed, null, 2);
+          }
+        });
+      }
+      //TODO: make hljs work
+      //hljs.initHighlightingOnLoad();
+    </script>
+  </head>
+  <body ng-controller="Ctrl">
+    <div class="container">
+      <div class="page-header">
+        <h1>HTTP Post Editor</h1>
+        <p class="lead">Write pretty JSON on one side, get raw HTTP Post data on the other and vice-versa.</p>
+      </div>
+      <div class="row monospaced">
+        <div class="col-md-6">
+          <textarea rows="20" class="form-control" ng-model="json" ng-change="mark('json')"></textarea>
+        </div>
+        <div class="col-md-6">
+          <textarea rows="20" class="form-control" ng-model="raw" ng-change="mark('raw')"></textarea>
+        </div>
+      </div>
+      <div class="footer">
+        by <a href="http://github.com/jansegre">@jansegre</a>
+      </div>
+  </body>
+</html>
